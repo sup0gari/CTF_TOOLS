@@ -97,7 +97,7 @@ def crack(hash_input, hash_type, wordlist):
             print(f"[!] John error:\n{result.stderr}")
             return 1
 
-        show_output = subprocess.check_output(["john", "--show", tmp_hash_file], text=True).strip()
+        how_output = subprocess.check_output(["john", "--show", f"--format={chosen_format}", tmp_hash_file], text=True).strip()
         print(show_output)
         print("=" * NUM)
 
