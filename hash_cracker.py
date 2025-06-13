@@ -131,36 +131,43 @@ def crack(hash_input, hash_type, wordlist):
             os.remove(tmp_hash_file)
 
 def main():
-    mode = select_mode()
-    if mode not in ("1", "2"):
-        print("Invalid mode. Exiting...")
-        return 1
-
-    hash_input = input("Enter a hash:\n> ").strip()
-    if not hash_input:
-        print("No hash. Exiting...")
-        return 1
-
-    candidates = analyze_hash_type(hash_input)
-    if not candidates:
-        print("Sorry, unknown hash. Exiting...")
-        return 1
-
-    if len(candidates) == 1:
-        selected_type = candidates[0]
-    else:
-        selected_type = select_from_candidates(candidates)
-
-    print(f"[+] Selected hash type: {selected_type}")
-
-    if mode == "2":
-        wordlist = check_rockyou()
-        if not wordlist:
-            print("[!] rockyou.txt not found. Exiting...")
+    try:
+        mode = select_mode()
+        if mode not in ("1", "2"):
+            print("Invalid mode. Exiting...")
             return 1
-        return crack(hash_input, selected_type, wordlist)
 
-    return 0
+        hash_input = input("Enter a hash:\n> ").strip()
+        if not hash_input:
+            print("No hash. Exiting...")
+            return 1
 
+        candidates = analyze_hash_type(hash_input)
+        if not candidates:
+            print("Sorry, unknown hash. Exiting...")
+            return 1
+
+        if len(candidates) == 1:
+            selected_type = candidates[0]
+        else:
+            selected_type = select_from_candidates(candidates)
+
+        print(f"[+] Selected hash type: {selected_type}")
+
+        if mode == "2":
+            wordlist = check_rockyou()
+            if not wordlist:
+                print("[!] rockyou.txt not found. Exiting...")
+                return 1
+            return crack(hash_input, selected_type, wordlist)
+        return 0
+    
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted by user. Exiting...")
+        return 1
+    
+    except Exception as e:
+        print(f"\n[x] Unexpected error occurred: {e}")
+        return 1
 if __name__ == '__main__':
     sys.exit(main())
