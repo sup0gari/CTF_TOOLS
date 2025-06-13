@@ -145,15 +145,20 @@ def main():
         if not candidates:
             print("SRY, UNKNOWN HASH. EXITING...")
             return 1
-
-        if len(candidates) == 1:
-            selected_type = candidates[0]
-        else:
-            selected_type = select_from_candidates(candidates)
-
-        print(f"[+] SELECTED HASH TYPE: {selected_type}")
+        
+        if mode == "1":
+            print("[*] POSSIBLE HASH TYPES FOUND:")
+            for name in candidates:
+                print(f"- {name}")
+            return 0
 
         if mode == "2":
+            if len(candidates) == 1:
+                selected_type = candidates[0]
+            else:
+                selected_type = select_from_candidates(candidates)
+
+            print(f"[+] SELECTED HASH TYPE: {selected_type}")
             wordlist = check_rockyou()
             if not wordlist:
                 print("[!] rockyou.txt NOT FOUND. EXITING...")
