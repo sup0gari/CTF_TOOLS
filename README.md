@@ -121,7 +121,7 @@ http://testsite.com/docs/10
 - Handles basic errors and interruptions gracefully.
 - Make sure the target server allows HEAD requests; otherwise, you may get false negatives.
 
-# CPDecrypt
+# cpdecrypt.py
 This script decrypts cpassword strings used in Microsoft Group Policy Preferences (GPP).
 It uses a known AES key and initialization vector (IV) to perform AES-CBC decryption of the base64-encoded cpassword.
 The decrypted output is then unpadded using PKCS#7 and decoded from UTF-16LE to reveal the plaintext password.
