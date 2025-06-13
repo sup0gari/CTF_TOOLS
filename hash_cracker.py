@@ -37,20 +37,9 @@ JOHN_FORMAT = {
 }
 
 def select_mode():
-    print("\n" + "=" * NUM)
-    print(r"""
-      ___ ___               .__      _________                       __                 
-     /   |   \_____    _____|  |__   \_   ___ \____________    ____ |  | __ ___________ 
-    /    ~    \__  \  /  ___/  |  \  /    \  \/\_  __ \__  \ _/ ___\|  |/ // __ \_  __ \
-    \    Y    // __ \_\___ \|   Y  \ \     \____|  | \// __ \\  \___|    <\  ___/|  | \/
-     \___|_  /(____  /____  >___|  /  \______  /|__|  (____  /\___  >__|_ \\___  >__|   
-          \/      \/     \/     \/          \/            \/     \/     \/    \/       
-    """)
-    print("=" * NUM + "\n")
-
-    print("Mode:")
-    print("1: Analyze hash type")
-    print("2: Analyze hash type and Crack it")
+    print("MODE:")
+    print("1: ANALYZE HASH TYPE")
+    print("2: ANALYZE HASH TYPE AND CRACK IT")
     mode = input("> ").strip()
     return mode
 
@@ -62,14 +51,14 @@ def analyze_hash_type(hash_input):
     return candidates
 
 def select_from_candidates(candidates):
-    print("\n[*] Multiple possible hash types detected:")
+    print("\n[*] MULTIPLE POSSIBLE HASH TYPES DETECTED:")
     for i, name in enumerate(candidates, 1):
         print(f"{i}: {name}")
     while True:
-        selected = input("Select the hash type:\n> ").strip()
+        selected = input("SELECT THE HASH TYPE:\n> ").strip()
         if selected.isdigit() and 1 <= int(selected) <= len(candidates):
             return candidates[int(selected) - 1]
-        print("Invalid choice. Try again.")
+        print("INVALID CHOICE. TRY AGAIN.")
 
 def check_rockyou():
     rockyou_path = WORDLIST_PATH
@@ -77,23 +66,23 @@ def check_rockyou():
     if os.path.exists(rockyou_path):
         return rockyou_path
     elif os.path.exists(rockyou_gz_path):
-        print(f"Please extract rockyou.txt.gz at {rockyou_gz_path}")
+        print(f"PLEASE EXTRACT rockyou.txt.gz AT {rockyou_gz_path}")
         return None
     else:
-        print("rockyou.txt or rockyou.txt.gz not found.")
+        print("rockyou.txt OR rockyou.txt.gz NOT FOUND.")
         return None
 
 def crack(hash_input, hash_type, wordlist):
     chosen_format = JOHN_FORMAT.get(hash_type)
     if not chosen_format:
-        print("[!] Unsupported hash format for cracking.")
+        print("[!] UNSUPPORTED HASH FORMAT FOR CRACKING.")
         return 1
 
     tmp_hash_file = "hash.txt"
     with open(tmp_hash_file, "w") as f:
         f.write(hash_input + "\n")
 
-    print(f"[*] Cracking hash using format: {chosen_format}")
+    print(f"[*] CRACKING HASH USING FORMAT: {chosen_format}")
     print("=" * NUM)
     try:
         result = subprocess.run([
@@ -117,14 +106,14 @@ def crack(hash_input, hash_type, wordlist):
                 parts = line.split(":")
                 if len(parts) >= 2:
                     password = parts[1]
-                    print(f"[+] Password found: {password}")
+                    print(f"[+] PASSWORD FOUND: {password}")
                     return 0
 
-        print("[!] Password not found in --show output.")
+        print("[!] PASSWORD NOT FOUND IN --show output.")
         return 1
 
     except Exception as e:
-        print(f"[!] Cracking failed: {e}")
+        print(f"[!] CRACKING FAILED: {e}")
         return 1
     finally:
         if os.path.exists(tmp_hash_file):
@@ -132,19 +121,29 @@ def crack(hash_input, hash_type, wordlist):
 
 def main():
     try:
+        print("\n" + "=" * NUM)
+        print(r"""
+      ___ ___               .__      _________                       __                 
+     /   |   \_____    _____|  |__   \_   ___ \____________    ____ |  | __ ___________ 
+    /    ~    \__  \  /  ___/  |  \  /    \  \/\_  __ \__  \ _/ ___\|  |/ // __ \_  __ \
+    \    Y    // __ \_\___ \|   Y  \ \     \____|  | \// __ \\  \___|    <\  ___/|  | \/
+     \___|_  /(____  /____  >___|  /  \______  /|__|  (____  /\___  >__|_ \\___  >__|   
+          \/      \/     \/     \/          \/            \/     \/     \/    \/       
+    """)
+        print("=" * NUM + "\n")
         mode = select_mode()
         if mode not in ("1", "2"):
-            print("Invalid mode. Exiting...")
+            print("INVALID MODE. EXITING...")
             return 1
 
         hash_input = input("Enter a hash:\n> ").strip()
         if not hash_input:
-            print("No hash. Exiting...")
+            print("NO HASH. EXITING...")
             return 1
 
         candidates = analyze_hash_type(hash_input)
         if not candidates:
-            print("Sorry, unknown hash. Exiting...")
+            print("SRY, UNKNOWN HASH. EXITING...")
             return 1
 
         if len(candidates) == 1:
@@ -152,22 +151,22 @@ def main():
         else:
             selected_type = select_from_candidates(candidates)
 
-        print(f"[+] Selected hash type: {selected_type}")
+        print(f"[+] SELECTED HASH TYPE: {selected_type}")
 
         if mode == "2":
             wordlist = check_rockyou()
             if not wordlist:
-                print("[!] rockyou.txt not found. Exiting...")
+                print("[!] rockyou.txt NOT FOUND. EXITING...")
                 return 1
             return crack(hash_input, selected_type, wordlist)
         return 0
     
     except KeyboardInterrupt:
-        print("\n[!] Interrupted by user. Exiting...")
+        print("\n[!] INTERRUPTED BY USER. EXITING...")
         return 1
     
     except Exception as e:
-        print(f"\n[x] Unexpected error occurred: {e}")
+        print(f"\n[x] UNEXPECTED ERROR OCCURRED: {e}")
         return 1
 if __name__ == '__main__':
     sys.exit(main())
