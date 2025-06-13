@@ -3,6 +3,11 @@ A simple hash identification and cracking tool using Python and John the Ripper.
 Supports multiple hash formats with automatic detection via regex.
 Useful for practicing basic cracking workflows and understanding how hash formats and cracking tools work internally.
 
+### Requirement
+- Python 3.X
+- John the Ripper (You can use `john` command.)
+- Wordlist (In this script, rockyou.txt is used as the wordlist for password cracking.)
+
 ### Usage
 ```bash
 python3 hash_cracker.py
