@@ -16,7 +16,7 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36"
 }
 
-def check_and_download(date_obj, URL, EXT):
+def check_and_download(date_obj, url, extensions):
     year, month, day = date_obj
     try:
         datetime(year, month, day)
@@ -24,8 +24,8 @@ def check_and_download(date_obj, URL, EXT):
         return
 
     date_string = f"{year:04d}-{month:02d}-{day:02d}" # YOU CAN EDIT THIS
-    filename = f"{date_string}.{EXT}"
-    url = URL.rstrip("/") + "/" + filename
+    filename = f"{date_string}.{extensions}"
+    url = url.rstrip("/") + "/" + filename
 
     try:
         head = requests.head(url, headers=HEADERS, timeout=HEAD_TIMEOUT)
@@ -61,34 +61,34 @@ _____.___.  _____  ________    ____________________ ____ _______________________
         """)
         print("=" * NUM + "\n")
 
-        URL = input("BASE URL (e.g. http://example.com): ").strip()
-        EXT = input("EXTENSION (e.g. pdf, txt, zip): ").strip()
-        YEAR = int(input("YEAR (e.g. 2025): ").strip())
-        MONTH_FROM = int(input("START MONTH (1-12): ").strip())
-        MONTH_TO = int(input("END MONTH (1-12): ").strip())
+        url = input("BASE URL (e.g. http://example.com): ").strip()
+        extensions = input("EXTENSION (e.g. pdf, txt, zip): ").strip()
+        year = int(input("YEAR (e.g. 2025): ").strip())
+        month_from = int(input("START MONTH (1-12): ").strip())
+        month_to = int(input("END MONTH (1-12): ").strip())
 
         os.makedirs(SAVE_DIR, exist_ok=True)
-        print(f"[*] CHECKING DAYS FROM 1 TO {MAX_DAYS} IN MONTHS {MONTH_FROM} TO {MONTH_TO}...\n")
+        print(f"[*] CHECKING DAYS FROM 1 TO {MAX_DAYS} IN MONTHS {month_from} TO {month_to}...\n")
 
         date_list = [
-            (YEAR, month, day)
-            for month in range(MONTH_FROM, MONTH_TO + 1)
+            (year, month, day)
+            for month in range(month_from, month_to + 1)
             for day in range(1, MAX_DAYS + 1)
         ]
 
         print(f"\n[*] SCAN WITH {THREADS} THREADS...\n")
 
         with ThreadPoolExecutor(max_workers=THREADS) as executor:
-            executor.map(lambda date: check_and_download(date, URL, EXT), date_list)
+            executor.map(lambda date: check_and_download(date, url, extensions), date_list)
 
         print("\n[*] SCAN COMPLETE")
-
+        return 0
     except KeyboardInterrupt:
         print("\n[!] INTERRUPTED BY USER. EXITING...")
-        sys.exit(1)
+        return 1
     except Exception as e:
         print(f"\n[x] UNEXPECTED ERROR: {e}")
-        sys.exit(1)
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
