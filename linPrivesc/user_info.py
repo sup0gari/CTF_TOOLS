@@ -1,7 +1,7 @@
 from common_imports import *
 from constants import CURRENT_USER
 from utils import skip
-from su_info import find_suid_files
+# from su_info import find_suid_files
 
 @skip
 def check_user(local_users):
@@ -15,13 +15,13 @@ def check_user(local_users):
     # for file in group_exec_files:
     #     print(f"  - {file}")
 
-    root_suid_files, local_user_suid_files = find_suid_files(local_users)
-    print(f"[*] SUID files owned by root:")
-    for file in root_suid_files:
-        print(f"  - {file}")
-    print("[*] SUID files owned by local users:")
-    for file in local_user_suid_files:
-        print(f"  - {file}")
+    # root_suid_files, local_user_suid_files = find_suid_files(local_users)
+    # print(f"[*] SUID files owned by root:")
+    # for file in root_suid_files:
+    #     print(f"  - {file}")
+    # print("[*] SUID files owned by local users:")
+    # for file in local_user_suid_files:
+    #     print(f"  - {file}")
 
 @skip
 def get_users():
