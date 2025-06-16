@@ -3,7 +3,16 @@ import os
 import subprocess
 import re
 
-WORDLIST_PATH = "/usr/share/wordlists/rockyou.txt" # YOUR WORDLIST PATH
+def info(msg):
+    print("\033[94m[*] {}\033[0m".format(msg))
+
+def warn(msg):
+    print("\033[91m[-] {}\033[0m".format(msg))
+
+def ok(msg):
+    print("\033[92m[+] {}\033[0m".format(msg))
+
+WORDLIST_PATH = "/usr/share/wordlists/rockyou.txt"
 NUM = 90
 
 HASH_PATTERNS = {
@@ -37,11 +46,10 @@ JOHN_FORMAT = {
 }
 
 def select_mode():
-    print("MODE:")
+    info("MODE:")
     print("1: ANALYZE HASH TYPE")
     print("2: ANALYZE HASH TYPE AND CRACK IT")
-    mode = input("> ").strip()
-    return mode
+    return input("> ").strip()
 
 def analyze_hash_type(hash_input):
     candidates = []
@@ -51,14 +59,14 @@ def analyze_hash_type(hash_input):
     return candidates
 
 def select_from_candidates(candidates):
-    print("\n[*] MULTIPLE POSSIBLE HASH TYPES DETECTED:")
+    info("MULTIPLE POSSIBLE HASH TYPES DETECTED:")
     for i, name in enumerate(candidates, 1):
-        print(f"{i}: {name}")
+        print("{}: {}".format(i, name))
     while True:
         selected = input("SELECT THE HASH TYPE:\n> ").strip()
         if selected.isdigit() and 1 <= int(selected) <= len(candidates):
             return candidates[int(selected) - 1]
-        print("INVALID CHOICE. TRY AGAIN.")
+        warn("INVALID CHOICE. TRY AGAIN.")
 
 def check_rockyou():
     rockyou_path = WORDLIST_PATH
@@ -66,38 +74,41 @@ def check_rockyou():
     if os.path.exists(rockyou_path):
         return rockyou_path
     elif os.path.exists(rockyou_gz_path):
-        print(f"PLEASE EXTRACT rockyou.txt.gz AT {rockyou_gz_path}")
+        warn("PLEASE EXTRACT rockyou.txt.gz AT {}".format(rockyou_gz_path))
         return None
     else:
-        print("rockyou.txt OR rockyou.txt.gz NOT FOUND.")
+        warn("rockyou.txt OR rockyou.txt.gz NOT FOUND.")
         return None
 
 def crack(hash_input, hash_type, wordlist):
     chosen_format = JOHN_FORMAT.get(hash_type)
     if not chosen_format:
-        print("[!] UNSUPPORTED HASH FORMAT FOR CRACKING.")
+        warn("UNSUPPORTED HASH FORMAT FOR CRACKING.")
         return 1
 
     tmp_hash_file = "hash.txt"
     with open(tmp_hash_file, "w") as f:
         f.write(hash_input + "\n")
 
-    print(f"[*] CRACKING HASH USING FORMAT: {chosen_format}")
+    info("CRACKING HASH USING FORMAT: {}".format(chosen_format))
     print("=" * NUM)
+
     try:
         result = subprocess.run([
             "john",
-            f"--format={chosen_format}",
-            f"--wordlist={wordlist}",
+            "--format={}".format(chosen_format),
+            "--wordlist={}".format(wordlist),
             "--fork=4",
             tmp_hash_file
-        ], capture_output=True, text=True)
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
         if result.returncode != 0:
-            print(f"[!] John error:\n{result.stderr}")
+            warn("John error:\n{}".format(result.stderr))
             return 1
 
-        show_output = subprocess.check_output(["john", "--show", f"--format={chosen_format}", tmp_hash_file], text=True).strip()
+        show_output = subprocess.check_output(
+            ["john", "--show", "--format={}".format(chosen_format), tmp_hash_file],
+            universal_newlines=True).strip()
         print(show_output)
         print("=" * NUM)
 
@@ -106,15 +117,16 @@ def crack(hash_input, hash_type, wordlist):
                 parts = line.split(":")
                 if len(parts) >= 2:
                     password = parts[1]
-                    print(f"[+] PASSWORD FOUND: {password}")
+                    ok("PASSWORD FOUND: {}".format(password))
                     return 0
 
-        print("[!] PASSWORD NOT FOUND IN --show output.")
+        warn("PASSWORD NOT FOUND IN --show output.")
         return 1
 
     except Exception as e:
-        print(f"[!] CRACKING FAILED: {e}")
+        warn("CRACKING FAILED: {}".format(e))
         return 1
+
     finally:
         if os.path.exists(tmp_hash_file):
             os.remove(tmp_hash_file)
@@ -129,27 +141,28 @@ def main():
     \    Y    // __ \_\___ \|   Y  \ \     \____|  | \// __ \\  \___|    <\  ___/|  | \/
      \___|_  /(____  /____  >___|  /  \______  /|__|  (____  /\___  >__|_ \\___  >__|   
           \/      \/     \/     \/          \/            \/     \/     \/    \/       
-    """)
+        """)
         print("=" * NUM + "\n")
+
         mode = select_mode()
         if mode not in ("1", "2"):
-            print("INVALID MODE. EXITING...")
+            warn("INVALID MODE. EXITING...")
             return 1
 
         hash_input = input("Enter a hash:\n> ").strip()
         if not hash_input:
-            print("NO HASH. EXITING...")
+            warn("NO HASH. EXITING...")
             return 1
 
         candidates = analyze_hash_type(hash_input)
         if not candidates:
-            print("SRY, UNKNOWN HASH. EXITING...")
+            warn("UNKNOWN HASH. EXITING...")
             return 1
-        
+
         if mode == "1":
-            print("[*] POSSIBLE HASH TYPES FOUND:")
+            info("POSSIBLE HASH TYPES FOUND:")
             for name in candidates:
-                print(f"- {name}")
+                print("- {}".format(name))
             return 0
 
         if mode == "2":
@@ -158,20 +171,23 @@ def main():
             else:
                 selected_type = select_from_candidates(candidates)
 
-            print(f"[+] SELECTED HASH TYPE: {selected_type}")
+            ok("SELECTED HASH TYPE: {}".format(selected_type))
             wordlist = check_rockyou()
             if not wordlist:
-                print("[!] rockyou.txt NOT FOUND. EXITING...")
+                warn("rockyou.txt NOT FOUND. EXITING...")
                 return 1
+
             return crack(hash_input, selected_type, wordlist)
+
         return 0
-    
+
     except KeyboardInterrupt:
-        print("\n[!] INTERRUPTED BY USER. EXITING...")
+        warn("INTERRUPTED BY USER. EXITING...")
         return 1
-    
+
     except Exception as e:
-        print(f"\n[x] UNEXPECTED ERROR OCCURRED: {e}")
+        warn("UNEXPECTED ERROR OCCURRED: {}".format(e))
         return 1
+
 if __name__ == '__main__':
     sys.exit(main())

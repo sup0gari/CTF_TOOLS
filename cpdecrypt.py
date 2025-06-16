@@ -1,60 +1,45 @@
-import sys
+#!/usr/bin/env python3
+
+import base64
 from Crypto.Cipher import AES
-from base64 import b64decode
 
-NUM = 70
-KEY_HEX = """
-4e 99 06 e8 fc b6 6c c9 fa f4 93 10 62 0f fe e8
-f4 96 e8 06 cc 05 79 90 20 9b 09 a4 33 b6 6c 1b
-"""
 IV = b"\x00" * 16
+KEY_HEX = "0123456789abcdef0123456789abcdef"
 
-def get_key_from_hex(key_hex):
-    return bytes.fromhex("".join(key_hex.split()))
+def info(msg):
+    print(f"\033[94m[*] {msg}\033[0m")
 
-def unpad_pkcs7(data):
+def warn(msg):
+    print(f"\033[91m[-] {msg}\033[0m")
+
+def ok(msg):
+    print(f"\033[92m[+] {msg}\033[0m")
+
+def pkcs7_unpad(data):
     pad_len = data[-1]
-    if pad_len < 1 or pad_len > 16:
-        raise ValueError("INVALID PADDING LENGTH")
+    if pad_len < 1 or pad_len > AES.block_size:
+        raise ValueError("Invalid padding length.")
     if data[-pad_len:] != bytes([pad_len]) * pad_len:
-        raise ValueError("INVALID PADDING BYTES")
+        raise ValueError("Invalid padding bytes.")
     return data[:-pad_len]
 
-def main():
-    try:
-        print("\n" + "=" * NUM)
-        print(r"""
-___________________________                                      __   
-\_   ___ \______   \______ \   ____   ___________ ___.__._______/  |_ 
-/    \  \/|     ___/|    |  \_/ __ \_/ ___\_  __ <   |  |\____ \   __\
-\     \___|    |    |    `   \  ___/\  \___|  | \/\___  ||  |_> >  |  
- \______  /____|   /_______  /\___  >\___  >__|   / ____||   __/|__|  
-        \/                 \/     \/     \/       \/     |__|                                      
-        """)
-        print("=" * NUM + "\n")
-
-        cpassword = input("CPASSWORD:\n> ").strip()
-        key = get_key_from_hex(KEY_HEX)
-        password_bytes = b64decode(cpassword, validate=True)
-        cipher = AES.new(key, AES.MODE_CBC, IV)
-        decrypted = cipher.decrypt(password_bytes)
-
-        try:
-            unpadded = unpad_pkcs7(decrypted)
-            password_utf16 = unpadded.decode('utf-16le')
-            print(f"\n[+] DECRYPTED PASSWORD:\n{password_utf16}\n")
-        except Exception as e:
-            print(f"[!] PADDING OR DECODING ERROR: {e}")
-            return 1
-
-        return 0
-
-    except KeyboardInterrupt:
-        print("\n[!] INTERRUPTED BY USER. EXITING...")
-        return 1
-    except Exception as e:
-        print(f"\n[x] UNEXPECTED ERROR: {e}")
-        return 1
+def decrypt_aes_cbc(base64_ciphertext, key_hex):
+    key = bytes.fromhex(key_hex)
+    ciphertext = base64.b64decode(base64_ciphertext)
+    cipher = AES.new(key, AES.MODE_CBC, IV)
+    decrypted = cipher.decrypt(ciphertext)
+    unpadded = pkcs7_unpad(decrypted)
+    return unpadded.decode("utf-16le")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    info("AES-CBC decoder for Python 3.5")
+    info(f"KEY (hex): {KEY_HEX}")
+    info("IV is 16 null bytes (\\x00 * 16)")
+
+    try:
+        b64input = input("Input base64 ciphertext:\n> ").strip()
+        result = decrypt_aes_cbc(b64input, KEY_HEX)
+        ok("Decryption success:")
+        print(result)
+    except Exception as e:
+        warn(f"Decryption failed: {e}")
