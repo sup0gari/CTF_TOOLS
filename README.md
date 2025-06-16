@@ -1,10 +1,46 @@
+# linprivesc.py
+This tool quickly collects essential information needed for privilege escalation on Linux systems. It shows details about the current user and groups, identifies accessible SUID files, and lists allowed sudo commands without requiring a password. It also inspects cron jobs for both the current user and system-wide, displays running processes in a clear format, and reveals open network ports along with their services. Furthermore, it searches for suspicious files with specific extensions such as .bak, .swp, .kdbx, and .txt, and scans important directories for files containing common credential or database-related keywords. The tool operates interactively, allowing the user to press Enter to proceed step-by-step, making it suitable for CTF environments and training due to its focus on simplicity and readability.
+
+### Requirement
+- Python 3.x
+
+### Usage
+```bash
+$python3 linprivesc.py
+```
+
+### Example
+```bash
+=====================================================================================
+
+.__  .__      __________        .__
+|  | |__| ____\______   \_______|__|__  __ ____   ______ ____
+|  | |  |/    \|     ___/\_  __ \  \  \/ // __ \ /  ___// ___\
+|  |_|  |   |  \    |     |  | \/  |\   /\  ___/ \___ \\  \___
+|____/__|___|  /____|     |__|  |__| \_/  \___  >____  >\___  >
+             \/                               \/     \/     \/
+
+=====================================================================================
+[*] Current User Info:
+  - User: sup0gari
+  - Groups: adm, dialout, cdrom, floppy, sudo, audio, dip, video, plugdev, netdev, test-ubuntu
+=====================================================================================
+```
+
+### Notes
+- This tool is designed for CTF and training environments to quickly gather privilege escalation information.
+- It may take time or produce errors if run on full-scale production systems due to extensive file searches and permission restrictions.
+- When running in large or real environments, consider restricting directories or running with appropriate permissions.
+- Press Enter to proceed to the next check. You can skip long operations by pressing Enter during their execution.
+- This tool prioritizes readability and simplicity over full automation and performance.
+
 # hash_cracker.py
 A simple hash identification and cracking tool using Python and John the Ripper.
 Supports multiple hash formats with automatic detection via regex.
 Useful for practicing basic cracking workflows and understanding how hash formats and cracking tools work internally.
 
 ### Requirement
-- Python 3.X
+- Python 3.x
 - John the Ripper (You can use `john` command.)
 - Wordlist (In this script, rockyou.txt is used as the wordlist for password cracking.)
 
@@ -127,7 +163,7 @@ It uses a known AES key and initialization vector (IV) to perform AES-CBC decryp
 The decrypted output is then unpadded using PKCS#7 and decoded from UTF-16LE to reveal the plaintext password.
 
 ### Requirement
-- Python 3.X
+- Python 3.x
 - pycryptodome
 
 ### Usage
