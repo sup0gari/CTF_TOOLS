@@ -80,10 +80,17 @@ def get_suid():
 def get_sudo():
     info("Running `sudo -l`...")
     output = run_command(['sudo', '-l', '-n'], silent_error=True)
-    if output:
-        print(output)
+    if output is None or "password for" in output.lower():
+        answer = input("Do you know the password? (Y/n): ").strip().lower()
+        if answer == 'n':
+            warn("Skipping sudo -l because password is unknown")
+            return
+        try:
+            subprocess.run(['sudo', '-l'], check=True)
+        except subprocess.CalledProcessError:
+            warn("Failed to run sudo -l with password")
     else:
-        warn("Failed to run sudo -l")
+        print(output)
 
 def get_cron():
     info("Checking cron jobs...")
